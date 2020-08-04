@@ -47,12 +47,13 @@ for i, result in enumerate(f['results']):
 	row['DOB'] = dob.date()
 	row['Age'] = result['dob']['age']
 	row['RDTB'] = dob.date()
-	row['Cell'] = result['cell']
-	row['Phone'] = result['phone']
+	row['Cell'] = ''.join([i for i in result['cell'] if i.isdigit()])
+	row['Phone'] = ''.join([i for i in result['phone'] if i.isdigit()])
 	row['Password'] = result['login']['password']
 	
 	users.append(row)
 
+print(users[0])
 Session = sessionmaker(bind=engine)
 session = Session()
 
