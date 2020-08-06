@@ -8,4 +8,4 @@ start program and import data from local(option=local) person.json or from the a
 show percentage of men and women in database
 
 ## -average-age [all/men/women]
-
+show average age of all people,men or women
