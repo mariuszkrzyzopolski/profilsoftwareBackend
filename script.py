@@ -8,7 +8,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--start", help="start the program,import data to the database")
-parser.add_argument("-percentage-sex", help="percentage of man and women in database")
+parser.add_argument("-percentage-sex", help="percentage of men and women in database")
+parser.add_argument("-average-age", help="average age of people")
 args = parser.parse_args()
 Session = sessionmaker()
 conn = DataConn(Session)
@@ -39,4 +40,15 @@ elif args.percentage_sex:
     male = conn.session.query(Users).filter(Users.Gender.like('male')).count() / all * 100
     female = conn.session.query(Users).filter(Users.Gender.like('female')).count() / all * 100
     print(f'There is {male} % male and {female} % in database')
+elif args.average_age:
+    if args.average_age == 'all':
+        result = conn.session.query(func.sum(Users.Age)).select_from(Users).scalar() / \
+                 conn.session.query(func.count(Users.Age)).select_from(Users).scalar()
+    elif args.average_age == 'men':
+        result = conn.session.query(func.sum(Users.Age)).filter(Users.Gender.like('male')).scalar() / \
+                 conn.session.query(func.count(Users.Age)).filter(Users.Gender.like('male')).scalar()
+    else:
+        result = conn.session.query(func.sum(Users.Age)).filter(Users.Gender.like('female')).scalar() / \
+                 conn.session.query(func.count(Users.Age)).filter(Users.Gender.like('female')).scalar()
+    print(f'Average age from database is {result}')
 conn.session.close()
