@@ -1,14 +1,13 @@
 from sqlalchemy import *
 from sqlalchemy_utils import *
-from sqlalchemy.orm import sessionmaker
 
 
 class DataConn():
-    session = None
-
-    def __init__(self):
+    def __init__(self, sessionmake):
         self.engine = create_engine('sqlite:///RandomUsers.db')
+        self.session = sessionmake(bind=self.engine)
+
+    def createnewdatabase(self):
         if database_exists(self.engine.url): drop_database(self.engine.url)
         create_database(self.engine.url)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        return self.session

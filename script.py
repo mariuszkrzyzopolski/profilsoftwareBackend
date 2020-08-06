@@ -1,17 +1,22 @@
 import json
+from sqlalchemy import func
 from User import Users
 from Database import DataConn
 from datetime import datetime
+from sqlalchemy.orm import sessionmaker
 import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--start", help="start the program,import data to the database")
+parser.add_argument("-percentage-sex", help="percentage of man and women in database")
 args = parser.parse_args()
-conn = DataConn()
+Session = sessionmaker()
+conn = DataConn(Session)
 if args.start:
+    conn.createnewdatabase()
+    print(conn.createnewdatabase())
     data = open("persons.json", "r", encoding="utf8")
     f = json.loads(data.read())
-
     Users.__table__.create(bind=conn.engine, checkfirst=True)
     users = []
 
@@ -29,4 +34,9 @@ if args.start:
         row = Users(**user)
         conn.session.add(row)
     conn.session.commit()
+elif args.percentage_sex:
+    all = conn.session.query(func.count('*')).select_from(Users).scalar()
+    male = conn.session.query(Users).filter(Users.Gender.like('male')).count() / all * 100
+    female = conn.session.query(Users).filter(Users.Gender.like('female')).count() / all * 100
+    print(f'There is {male} % male and {female} % in database')
 conn.session.close()
