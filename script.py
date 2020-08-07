@@ -1,5 +1,5 @@
 import json
-from sqlalchemy import func
+from sqlalchemy import func, sql
 from User import Users
 from Database import DataConn
 from datetime import datetime
@@ -11,6 +11,9 @@ parser.add_argument("--start", help="start the program,import data to the databa
 parser.add_argument("-percentage-sex", help="percentage of men and women in database")
 parser.add_argument("-average-age", help="average age of people")
 parser.add_argument("-popular-city", help="most popular cities from database")
+parser.add_argument("-popular-password", help="most popular passwords from database")
+parser.add_argument("-start-birth", help="start date for range of birth user.Format YYYY-MM-DD")
+parser.add_argument("-end-birth", help="end date for range of birth user. Format YYYY-MM-DD")
 args = parser.parse_args()
 Session = sessionmaker()
 conn = DataConn(Session)
@@ -53,7 +56,21 @@ elif args.average_age:
                  conn.session.query(func.count(Users.Age)).filter(Users.Gender.like('female')).scalar()
     print(f'Average age from database is {result}')
 elif args.popular_city:
-    result = conn.session.query(Users.City, func.count(Users.City)).group_by(Users.City).order_by(func.count(Users.City).desc()).limit(args.popular_city).all()
+    result = conn.session.query(Users.City, func.count(Users.City)).group_by(Users.City) \
+        .order_by(func.count(Users.City).desc()).limit(args.popular_city).all()
     for city in result:
         print(city)
+elif args.popular_password:
+    result = conn.session.query(Users.Password, func.count(Users.Password)).group_by(Users.Password) \
+        .order_by(func.count(Users.Password).desc()).limit(args.popular_password).all()
+    for password in result:
+        print(password)
+elif args.start_birth:
+    if args.end_birth:
+        result = conn.session.query(Users.FirstName, Users.LastName, Users.DOB).filter(
+            sql.and_(Users.DOB > args.start_birth, Users.DOB < args.end_birth)).all()
+        for user in result:
+            print(user)
+    else:
+        print('Need start and end date')
 conn.session.close()
