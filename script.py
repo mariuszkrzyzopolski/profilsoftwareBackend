@@ -1,4 +1,6 @@
 import json
+
+import requests
 from sqlalchemy import func, sql
 from User import Users
 from Database import DataConn
@@ -19,13 +21,21 @@ Session = sessionmaker()
 conn = DataConn(Session)
 if args.start:
     conn.createnewdatabase()
-    print(conn.createnewdatabase())
-    data = open("persons.json", "r", encoding="utf8")
-    f = json.loads(data.read())
+    if args.start == 'local':
+        data = open("persons.json", "r", encoding="utf8")
+        data = json.loads(data.read())
+    else:
+        try:
+            res = requests.get('https://randomuser.me/api/?results=500')
+            res.raise_for_status()
+            data = res.json()
+            print(data)
+        except Exception as err:
+            print(f'Error occurred: {err}')
     Users.__table__.create(bind=conn.engine, checkfirst=True)
     users = []
 
-    for i, result in enumerate(f['results']):
+    for i, result in enumerate(data['results']):
         dob = datetime.strptime(result['dob']['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         row = {'UserId': i, 'Gender': result['gender'], 'Title': result['name']['title'],
                'FirstName': result['name']['first'], 'LastName': result['name']['last'],
