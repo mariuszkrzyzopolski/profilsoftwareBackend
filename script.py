@@ -1,5 +1,4 @@
 import json
-
 import requests
 from sqlalchemy import func, sql
 from User import Users
@@ -7,6 +6,7 @@ from Database import DataConn
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 import argparse
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--start", help="start the program,import data to the database")
@@ -16,6 +16,7 @@ parser.add_argument("-popular-city", help="most popular cities from database")
 parser.add_argument("-popular-password", help="most popular passwords from database")
 parser.add_argument("-start-birth", help="start date for range of birth user.Format YYYY-MM-DD")
 parser.add_argument("-end-birth", help="end date for range of birth user. Format YYYY-MM-DD")
+parser.add_argument("-best-password", type=int, help="Give the best passwords from database")
 args = parser.parse_args()
 Session = sessionmaker()
 conn = DataConn(Session)
@@ -83,4 +84,12 @@ elif args.start_birth:
             print(user)
     else:
         print('Need start and end date')
+elif args.best_password:
+    result = {}
+    all_passwords = conn.session.query(Users.Password).all()
+    for password in all_passwords:
+        result.update(Users.calculatebestpassword(password[0]))
+    sort_passwords = sorted(result.items(), key=lambda x: x[1], reverse=True)
+    for i in range(args.best_password):
+        print(sort_passwords[i])
 conn.session.close()

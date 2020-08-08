@@ -32,3 +32,17 @@ class Users(Base):
             nextbirthdayear = 2024
         nextbirthday = date(nextbirthdayear, self.month, self.day)
         return (nextbirthday - today).days
+
+    def calculatebestpassword(password):
+        score = 0
+        if not password.isupper() and password.isalnum and not password.isdigit():
+            score += 1
+        if not password.islower() and password.isalnum and not password.isdigit():
+            score += 2
+        if not password.isalpha():
+            score += 1
+        if len(password) >= 8:
+            score += 5
+        if not password.isalnum():
+            score += 3
+        return {password: score}
