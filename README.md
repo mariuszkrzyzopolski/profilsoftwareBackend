@@ -1,5 +1,10 @@
 # profilsoftwareBackend
 
+# Installation
+- import environment from environment.yml for anaconda or from requirements.txt for pip
+- activate new environment
+- in project directory initialize script(python script.py --start web/local)
+
 # Commands
 ## --start [web/local]
 start program and import data from local(option=local) person.json or from the api(option=web).Needed run first to initialize, after that not necessary and will overwrite last database
