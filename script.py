@@ -12,8 +12,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--start", help="start the program,import data to the database")
 parser.add_argument("-percentage-sex", help="percentage of men and women in database")
 parser.add_argument("-average-age", help="average age of people")
-parser.add_argument("-popular-city", help="most popular cities from database")
-parser.add_argument("-popular-password", help="most popular passwords from database")
+parser.add_argument("-popular-city", type=int, help="most popular cities from database")
+parser.add_argument("-popular-password", type=int, help="most popular passwords from database")
 parser.add_argument("-start-birth", help="start date for range of birth user.Format YYYY-MM-DD")
 parser.add_argument("-end-birth", help="end date for range of birth user. Format YYYY-MM-DD")
 parser.add_argument("-best-password", type=int, help="Give the best passwords from database")
@@ -30,7 +30,6 @@ if args.start:
             res = requests.get('https://randomuser.me/api/?results=500')
             res.raise_for_status()
             data = res.json()
-            print(data)
         except Exception as err:
             print(f'Error occurred: {err}')
     Users.__table__.create(bind=conn.engine, checkfirst=True)
@@ -54,7 +53,7 @@ elif args.percentage_sex:
     all = conn.session.query(func.count('*')).select_from(Users).scalar()
     male = conn.session.query(Users).filter(Users.Gender.like('male')).count() / all * 100
     female = conn.session.query(Users).filter(Users.Gender.like('female')).count() / all * 100
-    print(f'There is {male} % male and {female} % in database')
+    print(f'There is {male} % male and {female} % female in database')
 elif args.average_age:
     if args.average_age == 'all':
         result = conn.session.query(func.sum(Users.Age)).select_from(Users).scalar() / \
@@ -62,9 +61,11 @@ elif args.average_age:
     elif args.average_age == 'men':
         result = conn.session.query(func.sum(Users.Age)).filter(Users.Gender.like('male')).scalar() / \
                  conn.session.query(func.count(Users.Age)).filter(Users.Gender.like('male')).scalar()
-    else:
+    elif args.average_age == 'women':
         result = conn.session.query(func.sum(Users.Age)).filter(Users.Gender.like('female')).scalar() / \
                  conn.session.query(func.count(Users.Age)).filter(Users.Gender.like('female')).scalar()
+    else:
+        result = 'Give proper argument'
     print(f'Average age from database is {result}')
 elif args.popular_city:
     result = conn.session.query(Users.City, func.count(Users.City)).group_by(Users.City) \
